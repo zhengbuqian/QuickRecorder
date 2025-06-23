@@ -29,6 +29,7 @@ class SCContext {
     static var isPaused = false
     static var isResume = false
     static var isSkipFrame = false
+    static var isMicMuted = false
     static var lastPTS: CMTime?
     static var timeOffset = CMTimeMake(value: 0, timescale: 0)
     static var screenArea: NSRect?
@@ -333,6 +334,7 @@ class SCContext {
         recordCam = ""
         recordDevice = ""
         isMagnifierEnabled = false
+        isMicMuted = false
         mousePointer.orderOut(nil)
         screenMagnifier.orderOut(nil)
         AppDelegate.shared.stopGlobalMouseMonitor()
@@ -538,84 +540,14 @@ class SCContext {
         return getMicrophone().first(where: { $0.localizedName == deviceName })
     }
     
-    /*static func getChannelCount() -> Int? {
-        if let device = getCurrentMic() {
-            if let channels = device.formats.first?.formatDescription.audioChannelLayout?.numberOfChannels {
-                return channels
-            }
-            
-            let activeFormat = device.activeFormat
-            let description = activeFormat.formatDescription
-            if let audioStreamBasicDescription = CMAudioFormatDescriptionGetStreamBasicDescription(description)?.pointee {
-                let channelCount = audioStreamBasicDescription.mChannelsPerFrame
-                return max(2, Int(channelCount))
-            }
+    // New: Toggle microphone mute state during recording
+    static func toggleMicrophoneMute() {
+        guard streamType == .systemaudio && ud.bool(forKey: "recordMic") else { return }
+        isMicMuted.toggle()
+        DispatchQueue.main.async {
+            updateStatusBar()
         }
-        return getDefaultChannelCount()
     }
-    
-    static func getDefaultChannelCount() -> Int? {
-        var deviceID = AudioObjectID(0)
-        var propertySize = UInt32(MemoryLayout.size(ofValue: deviceID))
-        
-        // 获取默认音频输入设备
-        var address = AudioObjectPropertyAddress(
-            mSelector: kAudioHardwarePropertyDefaultInputDevice,
-            mScope: kAudioObjectPropertyScopeGlobal,
-            mElement: kAudioObjectPropertyElementMain
-        )
-        
-        let status = AudioObjectGetPropertyData(
-            AudioObjectID(kAudioObjectSystemObject),
-            &address,
-            0,
-            nil,
-            &propertySize,
-            &deviceID
-        )
-        
-        guard status == noErr else {
-            print("Failed to get default audio input device")
-            return nil
-        }
-        
-        // 获取通道数
-        address = AudioObjectPropertyAddress(
-            mSelector: kAudioDevicePropertyStreamConfiguration,
-            mScope: kAudioDevicePropertyScopeInput,
-            mElement: kAudioObjectPropertyElementMain
-        )
-        
-        // 查询流配置信息
-        var streamConfig: UnsafeMutableAudioBufferListPointer?
-        propertySize = 0
-        
-        // 先获取属性大小
-        let sizeStatus = AudioObjectGetPropertyDataSize(deviceID, &address, 0, nil, &propertySize)
-        guard sizeStatus == noErr else {
-            print("Failed to get size for stream configuration")
-            return nil
-        }
-        
-        // 分配内存以存储音频流配置
-        let bufferList = UnsafeMutablePointer<AudioBufferList>.allocate(capacity: Int(propertySize))
-        defer { bufferList.deallocate() }
-        
-        let configStatus = AudioObjectGetPropertyData(deviceID, &address, 0, nil, &propertySize, bufferList)
-        guard configStatus == noErr else {
-            print("Failed to get stream configuration")
-            return nil
-        }
-        
-        streamConfig = UnsafeMutableAudioBufferListPointer(bufferList)
-        
-        // 计算通道总数
-        var totalChannels = 0
-        for buffer in streamConfig! {
-            totalChannels += Int(buffer.mNumberChannels)
-        }
-        return max(2, totalChannels)
-    }*/
     
     static func getSampleRate() -> Int? {
         if let device = getCurrentMic() {

@@ -63,6 +63,18 @@ struct StatusBarItem: View {
                                             .foregroundStyle(.white)
                                             .frame(width: 16, alignment: .center)
                                     }).buttonStyle(.plain)
+                                    
+                                    // Add microphone toggle button for audio recording with mic
+                                    if SCContext.streamType == .systemaudio && ud.bool(forKey: "recordMic") {
+                                        Button(action: {
+                                            SCContext.toggleMicrophoneMute()
+                                        }, label: {
+                                            Image(systemName: SCContext.isMicMuted ? "mic.slash.circle.fill" : "mic.circle.fill")
+                                                .font(.system(size: 16))
+                                                .foregroundStyle(SCContext.isMicMuted ? .red : .white)
+                                                .frame(width: 16, alignment: .center)
+                                        }).buttonStyle(.plain)
+                                    }
                                 } else {
                                     Button(action:{
                                         DispatchQueue.main.async {
@@ -122,6 +134,18 @@ struct StatusBarItem: View {
                                             .foregroundStyle(.white)
                                             .frame(width: 16, alignment: .center)
                                     }).buttonStyle(.plain)
+                                    
+                                    // Add microphone toggle button for audio recording with mic
+                                    if SCContext.streamType == .systemaudio && ud.bool(forKey: "recordMic") {
+                                        Button(action: {
+                                            SCContext.toggleMicrophoneMute()
+                                        }, label: {
+                                            Image(systemName: SCContext.isMicMuted ? "mic.slash.circle.fill" : "mic.circle.fill")
+                                                .font(.system(size: 16))
+                                                .foregroundStyle(SCContext.isMicMuted ? .red : .white)
+                                                .frame(width: 16, alignment: .center)
+                                        }).buttonStyle(.plain)
+                                    }
                                 }
                                 Text(recordingLength)
                                     .foregroundStyle(.white)
