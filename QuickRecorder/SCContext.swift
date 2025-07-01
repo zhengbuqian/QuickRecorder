@@ -335,6 +335,9 @@ class SCContext {
         recordDevice = ""
         isMagnifierEnabled = false
         isMicMuted = false
+        DispatchQueue.main.async {
+            PopoverState.shared.isMicMuted = false
+        }
         mousePointer.orderOut(nil)
         screenMagnifier.orderOut(nil)
         AppDelegate.shared.stopGlobalMouseMonitor()

@@ -141,6 +141,9 @@ extension AppDelegate {
         SCContext.timeOffset = CMTimeMake(value: 0, timescale: 0)
         SCContext.isPaused = false
         SCContext.isResume = false
+        DispatchQueue.main.async {
+            PopoverState.shared.isMicMuted = SCContext.isMicMuted
+        }
         
         let audioOnly = SCContext.streamType == .systemaudio
         
